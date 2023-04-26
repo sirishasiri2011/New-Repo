@@ -1,1 +1,6 @@
-ss
+ <div class="col-auto" *ngIf="!isProjectViewer && !isProjectEditor">
+            <button class="link-button" id="btnManualInput" [disabled]="isEditing || isImportedSheet"
+                (click)="openCoreEntityForm()" [attr.disabled]="!isFormReady ? true : null">
+                <i class="far fa-plus"></i> Add Entity
+            </button>
+        </div>
