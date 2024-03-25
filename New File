@@ -1,3 +1,27 @@
+void FindChildNodes(dynamic obj, dynamic coreEntity, dynamic mainEntityId)
+{
+    List<dynamic> childNodes = new List<dynamic>();
+    if (obj != null)
+    {
+        foreach (var el in obj)
+        {
+            var element = el?.entityOwners?.FirstOrDefault(x => x.ownerId == coreEntity.coreEntityId);
+            if (element != null)
+            {
+                if (!this.entOwnerRefMap[mainEntityId].childNodes.Any(x => x.coreEntityId == el.coreEntityId))
+                {
+                    this.entOwnerRefMap[mainEntityId].childNodes.Add(new { coreEntityId = el.coreEntityId, entityName = el.entityName });
+                }
+                childNodes.Add(new { coreEntityId = el.coreEntityId, entityName = el.entityName });
+                foreach (var ch in childNodes)
+                {
+                    FindChildNodes(obj, ch, mainEntityId);
+                }
+            }
+        }
+    }
+}
+
 public dynamic CheckCircularReferenceOnAdditionalOwners()
 {
     bool circularRefFound = false;
