@@ -1,6 +1,35 @@
- <div class="col-auto" *ngIf="!isProjectViewer && !isProjectEditor">
-            <button class="link-button" id="btnManualInput" [disabled]="isEditing || isImportedSheet"
-                (click)="openCoreEntityForm()" [attr.disabled]="!isFormReady ? true : null">
-                <i class="far fa-plus"></i> Add Entity
-            </button>
-        </div>
+
+    checkCircularReferenceOnAdditionalOwners(): any {  
+        let circularRefFound = false;
+        let circularSequence: string = '';
+        let sequence = [];
+        this.circRefCheckMap.forEach(item => {
+            let result = item.childNodes.filter(o => item.ownerNodes.some(({coreEntityId}) => o.coreEntityId === coreEntityId));
+            if(result.length > 0) {                 
+                circularRefFound = true;
+                sequence = [... [item.entityName], ... result?.map(v => v.entityName), ...[item.entityName]];
+            }
+        });
+
+        if(circularRefFound) {
+            circularSequence = sequence.join(' -> ');
+            return circularSequence;
+        } else {
+            return [];
+        }
+    }
+
+    findChildNodes(obj: any, coreEntity: any, mainEntityId: any): void {
+        let childNodes = [];
+        obj?.forEach(el => {
+            let element = el?.entityOwners?.find(x => x.ownerId === coreEntity.coreEntityId);
+            if(element) { 
+                if(!this.entOwnerRefMap[mainEntityId].childNodes.some(x => x.coreEntityId === el.coreEntityId)) { 
+                    this.entOwnerRefMap[mainEntityId].childNodes.push({coreEntityId: el.coreEntityId, entityName: el.entityName});         
+                }              
+                childNodes.push({coreEntityId: el.coreEntityId, entityName: el.entityName});         
+                childNodes?.forEach(ch => {
+                    this.findChildNodes(obj, ch, mainEntityId);
+                })
+            }
+        })
