@@ -1,3 +1,28 @@
+public dynamic CheckCircularReferenceOnAdditionalOwners()
+{
+    bool circularRefFound = false;
+    string circularSequence = "";
+    List<string> sequence = new List<string>();
+    foreach (var item in circRefCheckMap)
+    {
+        var result = item.Value.ChildNodes.Where(o => item.Value.OwnerNodes.Any(x => o.CoreEntityId == x.CoreEntityId)).ToList();
+        if (result.Count > 0)
+        {
+            circularRefFound = true;
+            sequence = new List<string> { item.Value.EntityName }.Concat(result.Select(v => v.EntityName)).Concat(new List<string> { item.Value.EntityName }).ToList();
+        }
+    }
+    if (circularRefFound)
+    {
+        circularSequence = string.Join(" -> ", sequence);
+        return circularSequence;
+    }
+    else
+    {
+        return new List<string>();
+    }
+}
+
 
     checkCircularReferenceOnAdditionalOwners(): any {  
         let circularRefFound = false;
